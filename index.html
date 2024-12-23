@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baixar Áudio YouTube</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background-color: white;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 10px;
+            font-size: 14px;
+            width: 80%;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        h1 {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Baixar Áudio do YouTube</h1>
+        <input type="text" id="urlInput" placeholder="Cole o link do YouTube aqui">
+        <button onclick="baixarAudio()">Baixar Áudio</button>
+        <p id="status"></p>
+    </div>
+
+    <script>
+        function baixarAudio() {
+            const url = document.getElementById('urlInput').value;
+            if (url === "") {
+                alert("Por favor, insira o link do YouTube.");
+                return;
+            }
+
+            document.getElementById("status").textContent = "Processando...";
+
+            // Enviar a URL para o backend
+            fetch('http://127.0.0.1:5000/baixar_audio', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'url': url
+                })
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error("Erro ao baixar áudio");
+                }
+            })
+            .then(blob => {
+                // Criar um link para download
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'audio.mp3';
+                link.click();
+                document.getElementById("status").textContent = "Download Concluído!";
+            })
+            .catch(error => {
+                document.getElementById("status").textContent = `Erro: ${error.message}`;
+            });
+        }
+    </script>
+</body>
+</html>
