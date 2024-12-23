@@ -20,6 +20,8 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
+            width: 80%;
+            max-width: 400px;
         }
         input, button {
             padding: 10px;
@@ -40,6 +42,11 @@
         h1 {
             color: #333;
         }
+        img {
+            max-width: 100%;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
@@ -48,6 +55,7 @@
         <input type="text" id="urlInput" placeholder="Cole o link do YouTube aqui">
         <button onclick="baixarAudio()">Baixar Áudio</button>
         <p id="status"></p>
+        <img id="thumbnail" style="display:none;" alt="Thumbnail do Vídeo">
     </div>
 
     <script>
@@ -59,6 +67,7 @@
             }
 
             document.getElementById("status").textContent = "Processando...";
+            document.getElementById("thumbnail").style.display = "none";  // Esconde a imagem até obter a thumbnail
 
             // Enviar a URL para o backend
             fetch('http://127.0.0.1:5000/baixar_audio', {
@@ -78,13 +87,29 @@
                 // Criar um link para download
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = 'audio.mp3';
+                link.download = 'audio.wav';
                 link.click();
                 document.getElementById("status").textContent = "Download Concluído!";
             })
             .catch(error => {
                 document.getElementById("status").textContent = `Erro: ${error.message}`;
             });
+
+            // Agora obter a thumbnail do vídeo para exibir no site
+            fetch('http://127.0.0.1:5000/baixar_audio', {
+                method: 'POST',
+                body: new URLSearchParams({
+                    'url': url
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.thumbnail) {
+                    document.getElementById("thumbnail").src = data.thumbnail;
+                    document.getElementById("thumbnail").style.display = "block";
+                }
+            })
+            .catch(error => console.error('Erro ao carregar a thumbnail:', error));
         }
     </script>
 </body>
